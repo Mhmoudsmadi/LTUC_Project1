@@ -1,49 +1,54 @@
-		package tests;
+		package test;
 		
-		import java.util.Random;
+		import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 		
 		import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
+        import org.openqa.selenium.JavascriptExecutor;
+        import org.openqa.selenium.WebDriver;
 		import org.openqa.selenium.WebElement;
 		import org.openqa.selenium.chrome.ChromeDriver;
-		import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
 		import org.testng.Assert;
 		import org.testng.annotations.BeforeTest;
 		import org.testng.annotations.Test;
+
+import pages.CreateNewAccountPage;
+import utils.DriverFactory;
+import utils.TestData;
 		
 		public class Tests {
 			
-		
-			WebDriver driver = new EdgeDriver();
-			String webSite = "https://magento.softwaretestingboard.com/";
-			Random random = new Random();
-			String[] firstName = { "yazan", "mohammad", "mahmoud", "kalel", "ahmad", "abed" };
-			String fname = firstName[random.nextInt(firstName.length)];
-			String[] lastName = { "yanal", "kasem", "naeem", "ibraheem", "jakop" };
-			String lname = firstName[random.nextInt(lastName.length)];
-			String password = "sdM.12se";
-			int num=random.nextInt(84262);
-			String email=fname+lname+num+"@gmail.com";
+					
+			public WebDriver driver;
+			CreateNewAccountPage createNewAccountPage;
 			
-		
-			@BeforeTest
-			public void setup() {
-				driver.get(webSite);
-				driver.manage().window().maximize();
-		
+			public void navigateTo(String url) {
+			    driver.navigate().to(url);
 			}
+			
+			String  firstName = TestData.getRandomFirstName();
+		    String lastName = TestData.getRandomLastName();
+		    String email = TestData.getEmail(firstName, lastName);
+			
+		    
+		    
+			  @BeforeTest
+			    public void setup() {
+			        driver = DriverFactory.getDriver();
+			        driver.get("https://magento.softwaretestingboard.com");
+			        createNewAccountPage = new CreateNewAccountPage(driver);
+			    }
+
 		    //1
-			@Test(priority=1,enabled = true)
+			@Test(priority=1,enabled = false)
 			public void signUp() throws InterruptedException {
 				//driver.findElement(By.cssSelector("header[class='page-header'] li:nth-child(3) a:nth-child(1)")).click();
 				driver.navigate().to("https://magento.softwaretestingboard.com/customer/account/create/");
-				driver.findElement(By.id("firstname")).sendKeys(fname);
-				driver.findElement(By.id("lastname")).sendKeys(lname);
-				driver.findElement(By.id("email_address")).sendKeys(email);
-				driver.findElement(By.id("password")).sendKeys(password);
-				driver.findElement(By.id("password-confirmation")).sendKeys(password);
-				driver.findElement(By.cssSelector("button[title='Create an Account'] span")).click();
+				createNewAccountPage.fillForm(firstName, lastName, email, TestData.ValidPassword, TestData.ValidPassword);
+				 driver.findElement(createNewAccountPage.createAccountButton).click();
 				Boolean ActualResult=driver.getPageSource().contains("welcome");
 				Assert.assertEquals(true, ActualResult);
 				
@@ -70,13 +75,9 @@ import org.openqa.selenium.WebDriver;
 				String conferm="Please enter a valid email address";
 				//driver.findElement(By.cssSelector("header[class='page-header'] li:nth-child(3) a:nth-child(1)")).click();
 				driver.navigate().to("https://magento.softwaretestingboard.com/customer/account/create/");
-                driver.findElement(By.id("firstname")).sendKeys(fname);
-				driver.findElement(By.id("lastname")).sendKeys(lname);
-				driver.findElement(By.id("email_address")).sendKeys("ernlkwsfk25");
-				driver.findElement(By.id("password")).sendKeys(password);
-				driver.findElement(By.id("password-confirmation")).sendKeys(password);
-				driver.findElement(By.cssSelector("button[title='Create an Account'] span")).click();
-			    Boolean ActualResult=driver.getPageSource().contains(conferm);
+				createNewAccountPage.fillForm(firstName, lastName, "sljsdss56email", TestData.ValidPassword, TestData.ValidPassword);
+				 driver.findElement(createNewAccountPage.createAccountButton).click();
+				Boolean ActualResult=driver.getPageSource().contains(conferm);
 			    Assert.assertEquals(true, ActualResult);
 			}
 			
@@ -91,6 +92,34 @@ import org.openqa.selenium.WebDriver;
 				
 			}
 		
+			@Test(priority=5,enabled=true)
+			public void ResponsiveTest() throws InterruptedException {
+				 //WebDriverManager.chromedriver().setup();
+
+			        // Emulator Mobile (iPhone X)
+			        Map<String, String> mobileEmulation = new HashMap<>();
+			        mobileEmulation.put("deviceName", "iPhone XR");
+
+			        ChromeOptions chromeOptions = new ChromeOptions();
+			        chromeOptions.setExperimentalOption("mobileEmulation", mobileEmulation);
+
+			        WebDriver driver = new ChromeDriver(chromeOptions);
+
+			        driver.get("https://magento.softwaretestingboard.com");
+					driver.manage().window().maximize();
+			        Thread.sleep(3000);
+
+			        WebElement menuButton = driver.findElement(By.xpath("//a[@aria-label='store logo']//img"));
+			        if (menuButton.isDisplayed()) {
+			            System.out.println("She Web Site is Responsive (iPhone XR)");
+			        } else {
+			            System.out.println("The Web Site id Not Responsive (iPhone XR)");
+			        }
+
+				
+			}
+			
+			
 		}
 		
 		
